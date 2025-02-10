@@ -23,7 +23,7 @@ class GestaUsuarios:
     def _criptografar_senha(self, senha):
         return sha256(senha.encode()).hexdigest()
     
-    def cadastrar_usuario(self, nome, email, senha, tipo='cliente')
+    def cadastrar_usuario(self, nome, email, senha, tipo='cliente'):
         if not nome or not email or not senha:
             return False, "Todos os campos são obrigatórios"
         
