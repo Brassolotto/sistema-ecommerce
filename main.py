@@ -1,6 +1,6 @@
 from models.produtos import GestaProdutos
 from models.usuarios import GestaUsuarios
-from models.pedidos import GestaPedidos
+#from models.pedidos import GestaPedidos
 
 def menu_usuarios(gestao):
     while True:
@@ -70,7 +70,7 @@ Data cadastro: {usuario['data_cadastro']}""")
             email = input("Novo email: ")
             tipo = input("Novo tipo (cliente/admin): ")
 
-            atualizacoes = []
+            atualizacoes = {}
             if nome: atualizacoes['nome'] = nome
             if email: atualizacoes['email'] = email
             if tipo: atualizacoes['tipo'] = tipo
@@ -104,6 +104,69 @@ def menu_produtos(gestao):
         print("6. Voltar")
 
         opcao = input("\nEscolha uma opção: ").strip()
+
+        if opcao == "1":
+            nome = input("Nome do produto: ")
+            preco = input("Preço: ")
+            categoria = input("Categoria: ")
+            estoque = input("Quantidade em estoque: ")
+            descricao = input("Descrição: ")
+
+            sucesso, mensagem = gestao.adicionar_produto(nome, preco, categoria, estoque, descricao)
+            print(f"\n{mensagem}")
+
+        elif opcao == "2":
+            print(gestao.listar_produtos())
+
+        elif opcao == "3":
+            id = input("ID do produto: ")
+            produto = gestao.buscar_produto(id)
+            if produto:
+                print(f"""
+ID: {produto['id']}
+Nome: {produto['nome']}
+Preço: R$ {produto['preco']:.2f}
+Categoria: {produto['categoria']}
+Estoque: {produto['estoque']}
+Descrição: {produto['descricao']}
+Data Cadastro: {produto['data_cadastro']}""")
+            else:
+                print("\nProduto não encontrado")
+
+        elif opcao == "4":
+            id = input("ID do produto: ")
+            print("\nDeixe em branco para manter o valor atual")
+            nome = input("Novo nome: ")
+            preco = input("Novo preço: ")
+            categoria = input("Nova categoria: ")
+            estoque = input("Novo estoque: ")
+            descricao = input("Nova descrição: ")
+
+            atualizacoes = {}
+            if nome: atualizacoes['nome'] = nome
+            if preco: atualizacoes['preco'] = preco
+            if categoria: atualizacoes['categoria'] = categoria
+            if estoque: atualizacoes['estoque'] = estoque
+            if descricao: atualizacoes['descricao'] = descricao
+
+            sucesso, mensagem = gestao.atualizar_produto(id, **atualizacoes)
+            print(f"\n{mensagem}")
+
+        elif opcao == "5":
+            id = input("ID do produto: ")
+            confirma = input("Tem certeza? (S/N): ").upper()
+
+            if confirma == 'S':
+                sucesso, mensagem = gestao.remover_produto(id)
+                print(f"\n{mensagem}")
+            else:
+                print("\nOperação cancelada")
+
+        elif opcao == "6":
+            break
+
+        else:
+            print("\nOpção inválida!")
 
 def main():
     print("=== Sistema de E-commerce ===")
