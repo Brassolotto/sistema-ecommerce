@@ -5,20 +5,39 @@ from hashlib import sha256
 
 class GestaUsuarios:
     def __init__(self):
+        self.arquivo_dados = os.path.join('data', 'usuarios.json')
         self.usuarios = {}
         self.proximo_id = 1
         self.arquivo_dados = os.path.join('data', 'usuarios.json')
         self.carregar_usuarios()
 
+    def salvar_usuarios(self):
+        with open(self.arquivo_dados, 'w') as arquivo:
+            json.dump({
+                'usuarios': self.usuarios,
+                'proximo_id': self.proximo_id
+            }, arquivo, indent=4)
+
     def carregar_usuarios(self):
         try:
+
+            os.makedirs(os.path.dirname(self.arquivo_dados), exist_ok=True)
+
+            if not os.path.exists(self.arquivo_dados) or os.path.getsize(self.arquivo_dados) == 0:
+                self.usuarios = {}
+                self.proximo_id = 1
+                self.salvar_usuarios()
+                return
+
             with open(self.arquivo_dados, 'r') as arquivo:
                 dados = json.load(arquivo)
                 self.usuarios = dados['usuarios']
                 self.proximo_id = dados['proximo_id']
-        except FileNotFoundError:
+        except json.JSONDecodeError:
+            print("Arquivo de dados corrompido. Iniciando com dados vazios.")
             self.usuarios = {}
             self.proximo_id = 1
+            self.salvar_usuarios()
 
     def _criptografar_senha(self, senha):
         return sha256(senha.encode()).hexdigest()
@@ -37,9 +56,9 @@ class GestaUsuarios:
             'nome': nome.strip(),
             'email': email.lower().strip(),
             'senha': self._criptografar_senha(senha),
-            'tipo': tipo,
+            'tipo': tipo.strip().lower(),
             'enderecos': [],
-            'data_cadastro': datetime.now().strftime('%d/%m/%y %H:%M')
+            'data_cadastro': datetime.now().strftime('%d/%m/%Y %H:%M')
         }
 
         self.usuarios[str(self.proximo_id)] = usuario
@@ -81,11 +100,15 @@ Tipo: {usuario['tipo']}
 Endereços: {usuario['enderecos']}
 Data cadastro: {usuario['data_cadastro']}
 {'-' * 30}""")
-            return '\n'.join(lista)
+        return '\n'.join(lista)
         
     def buscar_usuario(self, id):
         id = str(id)
-        if not id in self.usuarios:
+        return self.usuarios.get(id, None)
+    
+    def atualizar_usuario(self, id, **kwargs):
+        id = str(id)
+        if id not in self.usuarios:
             return False, "Usuário não encontrado"
             
         campos_permitidos = {'nome', 'email', 'tipo'}

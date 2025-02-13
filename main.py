@@ -185,7 +185,7 @@ def main():
         if opcao == "1":
             menu_produtos(gestao_produtos)
         elif opcao == "2":
-            print("\nGestão de Usuários em desenvolvimento")
+            menu_usuarios(gestao_usuarios)
         elif opcao == "3":
             print("\nGestão de Pedidos em desenvolvimento")
         elif opcao == "4":
